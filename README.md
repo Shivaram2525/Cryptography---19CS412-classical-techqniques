@@ -310,44 +310,44 @@ The Vigenere cipher is a method of encrypting alphabetic text by using a series 
 ## PROGRAM:
 PROGRAM:
 ```
-#include<stdio.h> #include<string.h>
-//FunctiontoperformVigenereencryption voidvigenereEncrypt(char*text,constchar*key){ inttextLen= strlen(text);
-intkeyLen=strlen(key); for(inti =0;i< textLen;i++){ charc =text[i]; if(c>='A'&&c<='Z'){
-//Encryptuppercaseletters
-text[i]=((c-'A'+key[i%keyLen]-'A')%26)+'A';
-}else if(c>='a'&&c<='z'){
-//Encryptlowercaseletters
-text[i]=((c-'a'+key[i%keyLen]-'A')%26)+'a';
-}
-}
-}
-//FunctiontoperformVigeneredecryption voidvigenereDecrypt(char*text,constchar*key){ inttextLen= strlen(text);
-intkeyLen=strlen(key);
 
-for(inti =0;i< textLen;i++){ charc =text[i]; if(c>='A'&&c<='Z'){
-//Decryptuppercaseletters
- 
-text[i]=((c-'A'-(key[i% keyLen]-'A') +26) %26)+ 'A';
-}else if(c>='a'&&c<='z'){
-//Decryptlowercaseletters
-text[i]=((c-'a'-(key[i% keyLen]-'A') +26) %26)+ 'a';
-}
-}
-}
-intmain(){
-constchar *key="KEY";//Replacewithyourdesired key
-char message[]= "Thisisasecretmessage.";//Replace withyourmessage
-//Encrypt themessage vigenereEncrypt(message,key); printf("EncryptedMessage:%s\n",message);
-//Decrypt themessage backtotheoriginal vigenereDecrypt(message,key); printf("DecryptedMessage:%s\n",message); Return 0;
+def vigenere_cipher(text, key, mode='encrypt'):
+    text = text.upper().replace(" ", "")
+    key = key.upper()
+    key_repeated = (key * (len(text) // len(key) + 1))[:len(text)]
+    result = ""
+    
+    for t, k in zip(text, key_repeated):
+        shift = ord(k) - ord('A')
+        if mode == 'encrypt':
+            result += chr((ord(t) - ord('A') + shift) % 26 + ord('A'))
+        else:
+            result += chr((ord(t) - ord('A') - shift) % 26 + ord('A'))
+    
+    return result
+
+# Get user input
+message = input("Enter the message: ").strip()
+key = input("Enter the key: ").strip()
+
+encrypted_text = vigenere_cipher(message, key, mode='encrypt')
+decrypted_text = vigenere_cipher(encrypted_text, key, mode='decrypt')
+
+print("Encrypted:", encrypted_text)
+print("Decrypted:", decrypted_text)
+
 ```
 ## OUTPUT:
-OUTPUT :
 
-Simulating Vigenere Cipher
+Simulating Vigenere Cipher.....
 
+```
 
-Input Message : SecurityLaboratory
-Encrypted Message : NMIYEMKCNIQVVROWXC Decrypted Message : SECURITYLABORATORY
+Input Message     : HELLO
+Encrypted Message : RIJVS
+Decrypted Message : HELLO
+
+```
 ## RESULT:
 The program is executed successfully
 
