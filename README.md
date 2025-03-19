@@ -31,51 +31,41 @@ Implementation using C or pyhton code
 
 ## PROGRAM:
 PROGRAM:
+```
 CaearCipher.
-#include <stdio.h>
-#include <stdlib.h>
- 
-// Function to perform Caesar Cipher encryption void caesarEncrypt(char *text, int key) {
-   for (int i = 0; text[i] != '\0'; i++) { char c = text[i];
-// Check if the character is an uppercase letter 
-    if (c >= 'A' && c <= 'Z') {
-    text[i] = ((c - 'A' + key) % 26 + 26) % 26 + 'A';
-    }
-// Check if the character is a lowercase letter
-    else if (c >= 'a' && c <= 'z') {
-        text[i] = ((c - 'a' + key) % 26 + 26) % 26 + 'a';
-    }
-// Ignore non-alphabetic characters
-    }
-}
+def caesar_cipher(text, key, mode='encrypt'):
+    result = ""
+    
+    for char in text:
+        if char.isalpha():  # Check if the character is a letter
+            shift = key if mode == 'encrypt' else -key
+            base = ord('A') if char.isupper() else ord('a')
+            result += chr((ord(char) - base + shift) % 26 + base)
+        else:
+            result += char  # Keep non-alphabet characters unchanged
+    
+    return result
 
-// Function to perform Caesar Cipher decryption 
-void caesarDecrypt(char *text, int key) {
-// Decryption is the same as encryption with a negative key 
-caesarEncrypt(text, -key);
-}
+# Example usage
+message =input("Enter Plain Text please:")
+key = int(input("Enter the Key value please:"))  # Single key value
 
-int main() {
-char message[100]; // Declare a character array to store the message int key;
+encrypted_text = caesar_cipher(message, key, mode='encrypt')
+decrypted_text = caesar_cipher(encrypted_text, key, mode='decrypt')
 
-printf("Enter the message to encrypt: ");
-fgets(message, sizeof(message), stdin); // Read input from the user printf("Enter the Caesar Cipher key (an integer): ");
-scanf("%d", &key); // Read the key from the user
-// Encrypt the message using the Caesar Cipher caesarEncrypt(message, key); printf("Encrypted Message: %s", message);
-// Decrypt the message back to the original
- 
-caesarDecrypt(message, key); printf("Decrypted Message: %s", message); return 0;
-}
-
+print("Encrypted:", encrypted_text)
+print("Decrypted:", decrypted_text)
+```
 
 ## OUTPUT:
-OUTPUT:
-Simulating Caesar Cipher
 
+Simulating Caesar Cipher.....
 
-Input : Anna University
-Encrypted Message : Dqqd Xqlyhuvlwb Decrypted Message : Anna University
-
+```
+Input : hello
+Encrypted Message : khoor
+Decrypted Message : hello
+```
 ## RESULT:
 The program is executed successfully
 
@@ -119,162 +109,76 @@ To decrypt, use the INVERSE (opposite) of the last 3 rules, and the 1st as-is (d
 
 
 ## PROGRAM:
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define SIZE 30
+```
+import itertools
 
-// Function to convert the string to lowercase void toLowerCase(char plain[], int ps)
-{
-int i;
-for (i = 0; i < ps; i++) {
-if (plain[i] > 64 && plain[i] < 91)
- 
-plain[i] += 32;
-}
-}
+def generate_playfair_matrix(key):
+    key = key.upper().replace("J", "I")  # Convert key to uppercase and replace J with I
+    key = "".join(dict.fromkeys(key))  # Remove duplicate letters
+    alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+    key += "".join(c for c in alphabet if c not in key)
+    
+    matrix = [list(key[i:i+5]) for i in range(0, 25, 5)]
+    return matrix
 
-// Function to remove all spaces in a string 
-int removeSpaces(char* plain, int ps)
-{
-int i, count = 0;
-for (i = 0; i < ps; i++)
-if (plain[i] != ' ')
-plain[count++] = plain[i];
-plain[count] = '\0'; return count;
-}
+def find_position(matrix, letter):
+    for row, line in enumerate(matrix):
+        if letter in line:
+            return row, line.index(letter)
+    return None
 
-// Function to generate the 5x5 key square
-void generateKeyTable(char key[], int ks, char keyT[5][5])
-{
-int i, j, k, flag = 0, *dicty;
+def playfair_cipher(text, key, mode='encrypt'):
+    matrix = generate_playfair_matrix(key)
+    text = text.upper().replace("J", "I").replace(" ", "")  # Convert text to uppercase
+    pairs = []
+    i = 0
 
-// a 26 character hashmap
-// to store count of the alphabet dicty = (int*)calloc(26, sizeof(int)); for (i = 0; i < ks; i++) {
-if (key[i] != 'j')
-dicty[key[i] - 97] = 2;
-}
+    while i < len(text):
+        a = text[i]
+        if i + 1 < len(text) and text[i] != text[i + 1]:
+            b = text[i + 1]
+            i += 2
+        else:
+            b = 'X'  # Add 'X' if the letter is repeated or if it's a single letter at the end
+            i += 1
 
-dicty['j' - 97] = 1;
+        pairs.append((a, b))
 
-i = 0;
-j = 0;
-for (k = 0; k < ks; k++) {
-if (dicty[key[k] - 97] == 2) {
-dicty[key[k] - 97] -= 1;
-keyT[i][j] = key[k]; j++;
-if (j == 5) {
-i++; j = 0;
-}
-}
-}
+    result = ""
+    for a, b in pairs:
+        pos_a = find_position(matrix, a)
+        pos_b = find_position(matrix, b)
 
-for (k = 0; k < 26; k++) {
-if (dicty[k] == 0) {
-keyT[i][j] = (char)(k + 97);
- 
-j++;
-if (j == 5) {
-i++; j = 0;
-}
-}
-}
-}
-// Function to search for the characters of a digraph
-// in the key square and return their position
-void search(char keyT[5][5], char a, char b, int arr[])
-{
-int i, j;
+        if pos_a is None or pos_b is None:
+            continue  # Skip if letter is not found (shouldn't happen)
 
-if (a == 'j')
-a = 'i'; else if (b == 'j')
-b = 'i';
-for (i = 0; i < 5; i++) {
+        row_a, col_a = pos_a
+        row_b, col_b = pos_b
 
-for (j = 0; j < 5; j++) {
+        if row_a == row_b:  # Same row
+            col_a = (col_a + 1) % 5 if mode == 'encrypt' else (col_a - 1) % 5
+            col_b = (col_b + 1) % 5 if mode == 'encrypt' else (col_b - 1) % 5
+        elif col_a == col_b:  # Same column
+            row_a = (row_a + 1) % 5 if mode == 'encrypt' else (row_a - 1) % 5
+            row_b = (row_b + 1) % 5 if mode == 'encrypt' else (row_b - 1) % 5
+        else:  # Rectangle swap
+            col_a, col_b = col_b, col_a
 
-if (keyT[i][j] == a) {
-arr[0] = i;
-arr[1] = j;
-}
-else if (keyT[i][j] == b) {
-arr[2] = i;
-arr[3] = j;
-}
-}
-}
-}
+        result += matrix[row_a][col_a] + matrix[row_b][col_b]
 
-// Function to find the modulus with 5 int mod5(int a)
-{
-return (a % 5);
-}
+    return result
 
-// Function to make the plain text length to be even int prepare(char str[], int ptrs)
-{
-if (ptrs % 2 != 0) {
-str[ptrs++] = 'z';
-str[ptrs] = '\0';
- 
-}
-return ptrs;
-}
+# Get user input
+message = input("Enter the message: ").strip()
+key = input("Enter the key: ").strip()
 
-// Function for performing the encryption
-void encrypt(char str[], char keyT[5][5], int ps)
-{
-int i, a[4];
+encrypted_text = playfair_cipher(message, key, mode='encrypt')
+decrypted_text = playfair_cipher(encrypted_text, key, mode='decrypt')
 
-for (i = 0; i < ps; i += 2) {
-search(keyT, str[i], str[i + 1], a); if (a[0] == a[2]) {
-str[i] = keyT[a[0]][mod5(a[1] + 1)];
-str[i + 1] = keyT[a[0]][mod5(a[3] + 1)];
-}
-else if (a[1] == a[3]) {
-str[i] = keyT[mod5(a[0] + 1)][a[1]];
-str[i + 1] = keyT[mod5(a[2] + 1)][a[1]];
- 
-}
-else {
+print("Encrypted:", encrypted_text)
+print("Decrypted:", decrypted_text)
 
-}
-}
-}
- 
-
-str[i] = keyT[a[0]][a[3]];
-str[i + 1] = keyT[a[2]][a[1]];
- 
-
-// Function to encrypt using Playfair Cipher
-void encryptByPlayfairCipher(char str[], char key[])
-{
-char ps, ks, keyT[5][5];
-
-// Key
-ks = strlen(key);
-ks = removeSpaces(key, ks); toLowerCase(key, ks);
-
-// Plaintext
-ps = strlen(str); toLowerCase(str, ps);
-ps = removeSpaces(str, ps); ps = prepare(str, ps);
-generateKeyTable(key, ks, keyT); encrypt(str, keyT, ps);
- 
-}
-// Driver code int main()
-{
-char str[SIZE], key[SIZE];
-
-// Key to be encrypted strcpy(key, "Monarchy"); printf("Key text: %s\n", key);
-
-// Plaintext to be encrypted strcpy(str, "instruments"); printf("Plain text: %s\n", str);
-
-// encrypt using Playfair Cipher encryptByPlayfairCipher(str, key);
-printf("Cipher text: %s\n", str);
-
-return 0;
-}
-
+```
 ## OUTPUT:
 Output:
 Key text: Monarchy Plain text: instruments Cipher text: gatlmzclrqtx
@@ -313,6 +217,7 @@ The cipher can, be adapted to an alphabet with any number of letters. All arithm
 
 ## PROGRAM:
 PROGRAM:
+```
 #include <stdio.h> #include <string.h>
 int keymat[3][3] = { { 1, 2, 1 }, { 2, 3, 2 }, { 2, 2, 1 } };
 int invkeymat[3][3] = { { -1, 0, 1 }, { 2, -1, 0 }, { -2, 2, -1 } }; char key[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -357,7 +262,7 @@ strcat(dec, decode(a, b, c));
 }
 printf("Decoded message : %s\n", dec); return 0;
 }
-
+```
 
 ## OUTPUT:
 OUTPUT:
@@ -398,6 +303,7 @@ The Vigenere cipher is a method of encrypting alphabetic text by using a series 
 
 ## PROGRAM:
 PROGRAM:
+```
 #include<stdio.h> #include<string.h>
 //FunctiontoperformVigenereencryption voidvigenereEncrypt(char*text,constchar*key){ inttextLen= strlen(text);
 intkeyLen=strlen(key); for(inti =0;i< textLen;i++){ charc =text[i]; if(c>='A'&&c<='Z'){
@@ -427,7 +333,7 @@ constchar *key="KEY";//Replacewithyourdesired key
 char message[]= "Thisisasecretmessage.";//Replace withyourmessage
 //Encrypt themessage vigenereEncrypt(message,key); printf("EncryptedMessage:%s\n",message);
 //Decrypt themessage backtotheoriginal vigenereDecrypt(message,key); printf("DecryptedMessage:%s\n",message); Return 0;
-
+```
 ## OUTPUT:
 OUTPUT :
 
@@ -467,6 +373,7 @@ In the rail fence cipher, the plaintext is written downwards and diagonally on s
 ## PROGRAM:
 
 PROGRAM:
+```
 #include<stdio.h> #include<string.h> #include<stdlib.h> main()
 {
 int i,j,len,rails,count,code[100][1000]; char str[1000];
@@ -512,6 +419,7 @@ if(code[i][j]!=0) printf("%c",code[i][j]);
 }
 printf("\n");
 }
+```
 ## OUTPUT:
 OUTPUT:
 Enter a Secret Message wearediscovered
