@@ -380,56 +380,70 @@ In the rail fence cipher, the plaintext is written downwards and diagonally on s
 
 PROGRAM:
 ```
-#include<stdio.h> #include<string.h> #include<stdlib.h> main()
-{
-int i,j,len,rails,count,code[100][1000]; char str[1000];
-printf("Enter a Secret Message\n"); gets(str);
-len=strlen(str);
-printf("Enter number of rails\n"); scanf("%d",&rails); for(i=0;i<rails;i++)
-{
-for(j=0;j<len;j++)
-{
-code[i][j]=0;
-}
-}
-count=0; j=0;
-while(j<len)
-{
-if(count%2==0)
-{
-for(i=0;i<rails;i++)
-{
-//strcpy(code[i][j],str[j]);
-code[i][j]=(int)str[j]; j++;
-}
 
-}
-else
-{
- 
-for(i=rails-2;i>0;i--)
-{
-code[i][j]=(int)str[j]; j++;
-}
-}
+def rail_fence_encrypt(text, rails):
+    fence = [[] for _ in range(rails)]
+    rail = 0
+    direction = 1
+    
+    for char in text:
+        fence[rail].append(char)
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+    
+    return "".join("".join(row) for row in fence)
 
-count++;
-}
+def rail_fence_decrypt(ciphertext, rails):
+    fence = [['' for _ in range(len(ciphertext))] for _ in range(rails)]
+    rail = 0
+    direction = 1
+    
+    for i in range(len(ciphertext)):
+        fence[rail][i] = '*'
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+    
+    index = 0
+    for row in range(rails):
+        for col in range(len(ciphertext)):
+            if fence[row][col] == '*' and index < len(ciphertext):
+                fence[row][col] = ciphertext[index]
+                index += 1
+    
+    result = []
+    rail = 0
+    direction = 1
+    for i in range(len(ciphertext)):
+        result.append(fence[rail][i])
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+    
+    return "".join(result)
 
-for(i=0;i<rails;i++)
-{
-for(j=0;j<len;j++)
-{
-if(code[i][j]!=0) printf("%c",code[i][j]);
-}
-}
-printf("\n");
-}
+# Get user input
+message = input("Enter the message: ").replace(" ", "")
+rails = int(input("Enter the number of rails: "))
+
+encrypted_text = rail_fence_encrypt(message, rails)
+decrypted_text = rail_fence_decrypt(encrypted_text, rails)
+
+print("Encrypted:", encrypted_text)
+print("Decrypted:", decrypted_text)
+
 ```
 ## OUTPUT:
-OUTPUT:
-Enter a Secret Message wearediscovered
-Enter number of rails 2
-waeicvrderdsoee
+Simulating Rail Fence.....
+
+```
+
+Enter a Secret Message : HELLO
+Enter number of rails  : 3
+Decrypted Message      : HOELL
+
+```
+
 ## RESULT:
 The program is executed successfully
