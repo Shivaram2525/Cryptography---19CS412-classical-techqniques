@@ -180,9 +180,11 @@ print("Decrypted:", decrypted_text)
 
 ```
 ## OUTPUT:
-Output:
-Key text: Monarchy Plain text: instruments Cipher text: gatlmzclrqtx
-
+```
+Key text:    computer
+Plain text:  communication
+Cipher text: OMRMPCSGPTBDML
+```
 ## RESULT:
 The program is executed successfully
 
